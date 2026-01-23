@@ -12,12 +12,13 @@
         "defaultConfiguration": "production",
         "options": {
           "platform": "node",
-          "outputPath": "apps/api/dist",
+          "outputPath": "dist/apps/api",
           "format": [
             "cjs"
           ],
-          "bundle": false,
-          "main": "apps/api/src/main.ts",
+          "bundle": true,
+          "thirdParty": true,
+          "main": "apps/api/src/handler.ts",
           "tsConfig": "apps/api/tsconfig.app.json",
           "assets": [
             "apps/api/src/assets"
@@ -25,7 +26,7 @@
           "esbuildOptions": {
             "sourcemap": true,
             "outExtension": {
-              ".js": ".js"
+              ".js": ".cjs"
             }
           }
         },
@@ -35,7 +36,7 @@
             "esbuildOptions": {
               "sourcemap": false,
               "outExtension": {
-                ".js": ".js"
+                ".js": ".cjs"
               }
             }
           }
@@ -48,8 +49,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/apps/api/dist/package.json",
-          "{workspaceRoot}/apps/api/dist/pnpm-lock.yaml"
+          "{workspaceRoot}/dist/apps/api/package.json",
+          "{workspaceRoot}/dist/apps/api/pnpm-lock.yaml"
         ],
         "options": {
           "buildTarget": "build"
@@ -61,7 +62,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/apps/api/dist/workspace_modules"
+          "{workspaceRoot}/dist/apps/api/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {

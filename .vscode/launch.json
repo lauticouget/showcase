@@ -2,22 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Attach to SAM local-api",
       "type": "node",
-      "request": "launch",
-      "name": "Debug @showcase/api with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@showcase/api"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9229"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
+      "request": "attach",
+      "address": "localhost",
+      "port": 9229,
+      "localRoot": "${workspaceFolder}/dist/apps/api",
+      "remoteRoot": "/var/task",
+      "restart": true,
       "skipFiles": ["<node_internals>/**"],
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceFolder}/apps/api/dist/**/*.(m|c|)js",
-        "!**/node_modules/**"
-      ]
+      "sourceMaps": true
     }
   ]
 }

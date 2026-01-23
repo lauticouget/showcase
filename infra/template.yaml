@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  GraphqlApi:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs24.x
+      Architectures:
+        - arm64
+      Handler: handler.handler
+      Environment:
+        Variables:
+          NODE_OPTIONS: --enable-source-maps
+      CodeUri: ../dist/apps/api
+      MemorySize: 1024
+      Timeout: 15
+      Events:
+        HttpApi:
+          Type: HttpApi
+          Properties:
+            Path: /graphql
+            Method: POST
