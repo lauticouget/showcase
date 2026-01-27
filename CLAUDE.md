@@ -49,7 +49,7 @@ apps/api/src/
 
 The API builds to CommonJS format (.cjs) and is deployed to AWS Lambda via SAM. The SAM template ([infra/template.yaml](infra/template.yaml)) configures:
 - HTTP API with POST /graphql endpoint
-- 1024 MB memory, 15 second timeout
+- 256 MB memory, 15 second timeout
 - CodeUri points to dist/apps/api
 
 ### Next.js Web App (apps/web)
