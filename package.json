@@ -2,6 +2,7 @@
   "name": "@showcase/source",
   "version": "0.0.0",
   "license": "MIT",
+  "packageManager": "pnpm@9.7.1",
   "scripts": {
     "watch:typecheck": "nx typecheck api --watch",
     "build:api": "nx build api",
