@@ -1,6 +1,8 @@
 name: Continuous Integration
 
 on:
+  push:
+    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 
@@ -25,7 +27,22 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm nx affected --target=lint --base=origin/${{ github.base_ref }}
-      - run: pnpm nx affected --target=typecheck --base=origin/${{ github.base_ref }}
-      - run: pnpm nx affected --target=test --base=origin/${{ github.base_ref }}
-      - run: pnpm nx affected --target=build --base=origin/${{ github.base_ref }}
+      - name: Determine base ref
+        id: base
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "ref=origin/${{ github.base_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=HEAD~1" >> $GITHUB_OUTPUT
+          fi
+
+      - run: pnpm nx affected --target=lint --base=${{ steps.base.outputs.ref }}
+      - run: pnpm nx affected --target=typecheck --base=${{ steps.base.outputs.ref }}
+      - run: pnpm nx affected --target=test --base=${{ steps.base.outputs.ref }}
+      - run: pnpm nx build api
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: api-dist
+          path: dist/apps/api

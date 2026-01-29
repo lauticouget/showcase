@@ -1,41 +1,25 @@
 name: Continuous Deployment
 
 on:
-  push:
+  workflow_run:
+    workflows: [Continuous Integration]
+    types: [completed]
     branches: [main, develop]
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 permissions:
   id-token: write
   contents: read
+  actions: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm nx build api
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: api-dist
-          path: dist/apps/api
-
   deploy-dev:
-    if: github.ref == 'refs/heads/develop'
-    needs: build
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'develop'
     runs-on: ubuntu-latest
     environment: dev
     steps:
@@ -45,6 +29,8 @@ jobs:
         with:
           name: api-dist
           path: dist/apps/api
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -55,11 +41,12 @@ jobs:
         with:
           use-installer: true
 
-      - run: sam deploy --config-file infra/samconfig.yaml --config-env dev --template-file infra/template.yaml --no-confirm-changeset
+      - run: sam deploy --config-file infra/samconfig.toml --config-env dev --template-file infra/template.yaml --no-confirm-changeset
 
   deploy-prod:
-    if: github.ref == 'refs/heads/main'
-    needs: build
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     environment: prod
     steps:
@@ -69,6 +56,8 @@ jobs:
         with:
           name: api-dist
           path: dist/apps/api
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -79,4 +68,4 @@ jobs:
         with:
           use-installer: true
 
-      - run: sam deploy --config-file infra/samconfig.yaml --config-env prod --template-file infra/template.yaml
+      - run: sam deploy --config-file infra/samconfig.toml --config-env prod --template-file infra/template.yaml
