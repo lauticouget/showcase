@@ -1,4 +1,5 @@
 name: Continuous Integration
+run-name: "${{ github.ref_name }}: Continuous Integration"
 
 on:
   push:
