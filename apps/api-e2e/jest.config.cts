@@ -11,7 +11,7 @@ swcJestConfig.swcrc = false;
 
 export default {
   displayName: '@showcase/api-e2e',
-  preset: '../../jest.preset.js',
+  preset: '../../jest.preset.cjs',
   setupFiles: ['<rootDir>/src/test-setup.ts'],
   testEnvironment: 'node',
   transform: {
