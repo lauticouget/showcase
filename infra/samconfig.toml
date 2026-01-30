@@ -1,21 +1,20 @@
 version = 0.1
 
-[default.global.parameters]
-stack_name = "showcase-api"
+[dev.deploy.parameters]
 region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-
-[dev.deploy.parameters]
 stack_name = "showcase-api-dev"
+resolve_s3 = true
 s3_prefix = "showcase-api-dev"
 parameter_overrides = "Environment=dev"
-resolve_s3 = true
 disable_rollback = true
 
 [prod.deploy.parameters]
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
 stack_name = "showcase-api-prod"
+resolve_s3 = true
 s3_prefix = "showcase-api-prod"
 parameter_overrides = "Environment=prod"
-resolve_s3 = true
-confirm_changeset = true
