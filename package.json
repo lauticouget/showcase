@@ -4,6 +4,7 @@
   "license": "MIT",
   "packageManager": "pnpm@9.7.1",
   "scripts": {
+    "lint": "pnpm nx lint api && pnpm nx lint web",
     "watch:typecheck": "nx typecheck api --watch",
     "build:api": "nx build api",
     "watch:api": "nx build api --watch --configuration development",
