@@ -1,7 +1,7 @@
 version: 1
 applications:
   - frontend:
-      appRoot: 'apps/web'
+      appRoot: "apps/web"
       phases:
         preBuild:
           commands:
@@ -14,7 +14,7 @@ applications:
       artifacts:
         baseDirectory: .next
         files:
-          - '**/*'
+          - "**/*"
       cache:
         paths:
-          - '.next/cache/**/*'
+          - ".next/cache/**/*"
