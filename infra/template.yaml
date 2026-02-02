@@ -8,6 +8,10 @@ Parameters:
     AllowedValues:
       - dev
       - prod
+  ClientAppUrl:
+    Type: String
+    Description: 'The allowed origin for CORS'
+
 
 Globals:
   Function:
@@ -22,20 +26,44 @@ Globals:
         ENVIRONMENT: !Ref Environment
 
 Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref ClientAppUrl
+        AllowMethods:
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+        AllowCredentials: true
+
   GraphqlApi:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub showcase-api-${Environment}
       Handler: handler.handler
       CodeUri: ../dist/apps/api
+      Environment:
+        Variables:
+          CLIENT_APP_URL: !Ref ClientAppUrl
       Events:
-        HttpApi:
+        GraphqlPost:
           Type: HttpApi
           Properties:
+            ApiId: !Ref HttpApi
             Path: /graphql
             Method: POST
+        GraphqlOptions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /graphql
+            Method: OPTIONS
 
 Outputs:
   ApiEndpoint:
     Description: GraphQL API endpoint URL
-    Value: !Sub https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/graphql
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/graphql
