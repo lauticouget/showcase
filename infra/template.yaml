@@ -46,9 +46,6 @@ Resources:
       FunctionName: !Sub showcase-api-${Environment}
       Handler: handler.handler
       CodeUri: ../dist/apps/api
-      Environment:
-        Variables:
-          CLIENT_APP_URL: !Ref ClientAppUrl
       Events:
         GraphqlPost:
           Type: HttpApi
@@ -56,12 +53,7 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /graphql
             Method: POST
-        GraphqlOptions:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref HttpApi
-            Path: /graphql
-            Method: OPTIONS
+
 
 Outputs:
   ApiEndpoint:
