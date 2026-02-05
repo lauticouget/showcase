@@ -7,7 +7,7 @@ capabilities = "CAPABILITY_IAM"
 stack_name = "showcase-api-dev"
 resolve_s3 = true
 s3_prefix = "showcase-api-dev"
-parameter_overrides = "Environment=dev ClientAppUrl=\"https://develop.d2vmzmm9z53nmt.amplifyapp.com/\""
+parameter_overrides = "Environment=dev ClientAppUrl=\"https://develop.dwi87gyskj43z.amplifyapp.com/\""
 disable_rollback = true
 
 [prod.deploy.parameters]
@@ -17,4 +17,4 @@ capabilities = "CAPABILITY_IAM"
 stack_name = "showcase-api-prod"
 resolve_s3 = true
 s3_prefix = "showcase-api-prod"
-parameter_overrides = "Environment=prod ClientAppUrl=\"https://main.d2vmzmm9z53nmt.amplifyapp.com/\""
+parameter_overrides = "Environment=prod ClientAppUrl=\"https://main.dwi87gyskj43z.amplifyapp.com/\""
