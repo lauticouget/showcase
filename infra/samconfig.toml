@@ -3,6 +3,7 @@ version = 0.1
 [dev.deploy.parameters]
 region = "us-east-1"
 confirm_changeset = false
+fail_on_empty_changeset = false
 capabilities = "CAPABILITY_IAM"
 stack_name = "showcase-api-dev"
 resolve_s3 = true
@@ -13,6 +14,7 @@ disable_rollback = true
 [prod.deploy.parameters]
 region = "us-east-1"
 confirm_changeset = true
+fail_on_empty_changeset = false
 capabilities = "CAPABILITY_IAM"
 stack_name = "showcase-api-prod"
 resolve_s3 = true

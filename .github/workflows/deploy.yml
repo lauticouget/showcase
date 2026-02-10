@@ -44,7 +44,7 @@ jobs:
         with:
           use-installer: true
 
-      - run: sam deploy  --config-env dev --template-file infra/template.yaml 
+      - run: sam deploy --config-env dev --template-file infra/template.yaml
 
   deploy-prod:
     if: >
