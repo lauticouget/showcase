@@ -5,11 +5,11 @@
   "nx": {
     "targets": {
       "dev": {
-        "executor": "@nx/next:dev",
+        "executor": "@nx/next:server",
         "options": {
-          "port": 4200,
           "dev": true,
-          "turbo": true
+          "port": 4200,
+          "buildTarget": "@showcase/web:start"
         }
       }
     }
