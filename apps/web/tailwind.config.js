@@ -45,16 +45,16 @@ module.exports = {
       },
       keyframes: {
         'flow-right': {
-          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '0%': { left: '0%', opacity: '0' },
           '20%': { opacity: '1' },
           '80%': { opacity: '1' },
-          '100%': { transform: 'translateX(100%)', opacity: '0' },
+          '100%': { left: '100%', opacity: '0' },
         },
         'flow-down': {
-          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '0%': { top: '0%', opacity: '0' },
           '20%': { opacity: '1' },
           '80%': { opacity: '1' },
-          '100%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { top: '100%', opacity: '0' },
         },
         'pulse-glow': {
           '0%, 100%': { opacity: '0.4' },
