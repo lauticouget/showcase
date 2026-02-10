@@ -25,9 +25,9 @@ module.exports = {
           tertiary: '#1e1e1e',
         },
         accent: {
-          primary: '#00ff9f',
-          secondary: '#00d4ff',
-          tertiary: '#7c3aed',
+          primary: '#e11d48',
+          secondary: '#6b21a8',
+          tertiary: '#00d4ff',
         },
         text: {
           primary: '#ffffff',
@@ -36,12 +36,35 @@ module.exports = {
         },
         border: {
           DEFAULT: '#262626',
-          accent: '#404040',
+          accent: '#00b5b5',
         },
         code: {
           bg: '#0f0f0f',
           text: '#00ff9f',
         },
+      },
+      keyframes: {
+        'flow-right': {
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '20%': { opacity: '1' },
+          '80%': { opacity: '1' },
+          '100%': { transform: 'translateX(100%)', opacity: '0' },
+        },
+        'flow-down': {
+          '0%': { transform: 'translateY(-100%)', opacity: '0' },
+          '20%': { opacity: '1' },
+          '80%': { opacity: '1' },
+          '100%': { transform: 'translateY(100%)', opacity: '0' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'flow-right': 'flow-right 2s ease-in-out infinite',
+        'flow-down': 'flow-down 2s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
       },
     },
   },

@@ -55,7 +55,7 @@ export default function Hero() {
             <div className="relative h-48 w-48 md:h-64 md:w-64 lg:h-80 lg:w-80">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-accent-primary via-accent-secondary to-accent-tertiary opacity-50 blur-md" />
               <Image
-                src="/profile.jpg"
+                src="/profile_picture.jpg"
                 alt="Lautaro Couget"
                 fill
                 priority
