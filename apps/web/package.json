@@ -5,8 +5,11 @@
   "nx": {
     "targets": {
       "dev": {
+        "executor": "@nx/next:dev",
         "options": {
-          "command": "next dev --turbopack"
+          "port": 4200,
+          "dev": true,
+          "turbo": true
         }
       }
     }
