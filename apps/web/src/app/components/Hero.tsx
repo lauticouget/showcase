@@ -40,7 +40,7 @@ export default function Hero() {
                 LinkedIn
               </a>
               <a
-                href="https://github.com/lauticouget"
+                href="https://github.com/lauticouget/showcase"
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-lg border border-border-accent px-6 py-3 text-center text-sm font-semibold text-text-primary transition-colors hover:border-accent-primary hover:text-accent-primary"

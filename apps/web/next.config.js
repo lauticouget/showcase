@@ -9,6 +9,15 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  async rewrites() {
+    if (process.env.NODE_ENV !== 'development') return [];
+    return [
+      {
+        source: '/api/graphql',
+        destination: 'http://127.0.0.1:3000/graphql',
+      },
+    ];
+  },
 };
 
 const plugins = [

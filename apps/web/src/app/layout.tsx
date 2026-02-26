@@ -1,4 +1,5 @@
 import './global.css';
+import { ApolloWrapper } from '@/lib/graphql/ApolloWrapper';
 
 export const metadata = {
   title: 'Lautaro Couget — Full-Stack Developer',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <ApolloWrapper>{children}</ApolloWrapper>
+      </body>
     </html>
   );
 }

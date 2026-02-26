@@ -43,6 +43,10 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
+# Environment files
+.env.local
+.env*.local
+
 # Next.js
 .next
 out
