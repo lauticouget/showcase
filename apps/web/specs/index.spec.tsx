@@ -1,10 +1,23 @@
-import React from 'react';
+import { MockedProvider as MockedApolloProvider } from '@apollo/client/testing/react';
 import { render } from '@testing-library/react';
+
 import Page from '../src/app/page';
+import { HEALTH_QUERY } from '../src/lib/graphql/operations';
+
+const mocks = [
+  {
+    request: { query: HEALTH_QUERY },
+    result: { data: { health: 'OK' } },
+  },
+];
 
 describe('Page', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<Page />);
+    const { baseElement } = render(
+      <MockedApolloProvider mocks={mocks}>
+        <Page />
+      </MockedApolloProvider>
+    );
     expect(baseElement).toBeTruthy();
   });
 });
