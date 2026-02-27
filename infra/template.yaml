@@ -12,6 +12,9 @@ Parameters:
     Type: String
     Description: 'The allowed origin for CORS'
 
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
 
 Globals:
   Function:
@@ -24,8 +27,16 @@ Globals:
       Variables:
         NODE_OPTIONS: --enable-source-maps
         ENVIRONMENT: !Ref Environment
+        LOG_LEVEL: !If [IsProd, INFO, DEBUG]
 
 Resources:
+  GraphqlApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/showcase-api-${Environment}
+      RetentionInDays: !If [IsProd, 90, 14]
+
+
   HttpApi:
     Type: AWS::Serverless::HttpApi
     Properties:
