@@ -3,11 +3,14 @@ import {
   handlers,
   startServerAndCreateLambdaHandler,
 } from '@as-integrations/aws-lambda';
-import type { Context, APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import type {
+  APIGatewayProxyHandlerV2,
+  Context,
+} from 'aws-lambda';
 
-import { schema } from './schema';
 import { logger } from './lib/logger.js';
 import { createOperationLoggerPlugin } from './plugins/operationLogger.js';
+import { schema } from './schema';
 
 export interface AppContext {
   lambdaContext: Context;

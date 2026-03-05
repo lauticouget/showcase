@@ -30,8 +30,31 @@ Globals:
         LOG_LEVEL: !If [IsProd, INFO, DEBUG]
 
 Resources:
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub showcase-users-${Environment}
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      SSESpecification:
+        SSEEnabled: true
+
   GraphqlApiLogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Metadata:
+      guard:
+        SuppressedRules:
+          - CLOUDWATCH_LOG_GROUP_ENCRYPTED
+          - CW_LOGGROUP_RETENTION_PERIOD_CHECK
     Properties:
       LogGroupName: !Sub /aws/lambda/showcase-api-${Environment}
       RetentionInDays: !If [IsProd, 90, 14]
@@ -57,6 +80,13 @@ Resources:
       FunctionName: !Sub showcase-api-${Environment}
       Handler: handler.handler
       CodeUri: ../dist/apps/api
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Environment:
+        Variables:
+          USERS_TABLE: !Ref UsersTable
+          DYNAMODB_LOCAL_ENDPOINT: ''
       Events:
         GraphqlPost:
           Type: HttpApi
@@ -70,3 +100,7 @@ Outputs:
   ApiEndpoint:
     Description: GraphQL API endpoint URL
     Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/graphql
+
+  UsersTableName:
+    Description: DynamoDB Users table name
+    Value: !Ref UsersTable

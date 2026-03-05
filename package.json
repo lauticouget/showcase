@@ -9,9 +9,11 @@
     "build:api": "nx build api",
     "watch:api": "nx build api --watch --skip-nx-cache",
     "kill:container": "docker ps -q --filter publish=9229 | xargs -r docker stop || true",
-    "sam": "sam local start-api -t ./infra/template.yaml --warm-containers LAZY",
-    "sam:inspect": "pnpm kill:container && sam local start-api -t ./infra/template.yaml --warm-containers LAZY --debug-port 9229",
-    "dev:api": "concurrently --kill-others --names \"BUILD,SAM,TYPES\" -c \"cyan,magenta,yellow\" \"pnpm watch:api\" \"pnpm sam:inspect\" \"pnpm watch:typecheck\""
+    "dynamo:start": "docker compose -f ./infra/docker-compose.local.yaml up -d --wait && node ./scripts/create-local-table.mjs",
+    "dynamo:stop": "docker compose -f ./infra/docker-compose.local.yaml down",
+    "sam": "sam local start-api -t ./infra/template.yaml --warm-containers LAZY --docker-network showcase-local --env-vars ./infra/env.local.json",
+    "sam:inspect": "pnpm kill:container && sam local start-api -t ./infra/template.yaml --warm-containers LAZY --debug-port 9229 --docker-network showcase-local --env-vars ./infra/env.local.json",
+    "dev:api": "pnpm dynamo:start && concurrently --kill-others --names \"BUILD,SAM,TYPES\" -c \"cyan,magenta,yellow\" \"pnpm watch:api\" \"pnpm sam:inspect\" \"pnpm watch:typecheck\""
   },
   "nx": {},
   "private": true,
@@ -72,6 +74,8 @@
     "@apollo/server": "^5.2.0",
     "@as-integrations/aws-lambda": "^4.0.1",
     "@aws-lambda-powertools/logger": "^2.31.0",
+    "@aws-sdk/client-dynamodb": "^3.999.0",
+    "@aws-sdk/lib-dynamodb": "^3.999.0",
     "@graphql-tools/merge": "^9.1.7",
     "@graphql-tools/schema": "^10.0.31",
     "@graphql-tools/utils": "^11.0.0",
