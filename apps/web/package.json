@@ -15,6 +15,7 @@
     }
   },
   "dependencies": {
+    "@showcase/shared": "workspace:*",
     "@apollo/client": "^4.1.4",
     "@apollo/client-integration-nextjs": "^0.14.4",
     "next": "~16.0.1",

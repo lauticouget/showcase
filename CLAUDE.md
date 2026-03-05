@@ -76,6 +76,35 @@ All error constants live in `lib/errors.ts`:
 
 Always use `GraphQLErrorCode` and `DynamoErrorName` in resolvers — never hardcode strings.
 
+### Shared Library (libs/shared)
+
+Cross-app constants and types live in `libs/shared` — published as `@showcase/shared`:
+
+```
+libs/shared/src/
+  errors.ts     # GraphQLErrorCode enum
+  index.ts      # Barrel export
+```
+
+The package uses a custom `@showcase/source` export condition so TypeScript resolvers (both API and web) import from the `.ts` source directly without a build step. `apps/api/src/lib/errors.ts` re-exports `GraphQLErrorCode` from here.
+
+**Adding to the shared library**: add the export to `libs/shared/src/index.ts`, then run `pnpm install` once if adding a new package dependency.
+
+### GraphQL Codegen
+
+TypeScript types are **auto-generated** from the API GraphQL schema. Never write them by hand.
+
+- Config: `codegen.ts` at workspace root
+- Schema source: `apps/api/src/modules/**/typeDefs.ts`
+- Operation documents: `apps/web/src/lib/graphql/operations/**/*.ts`
+- Output: `apps/web/src/lib/graphql/generated/types.ts`
+
+```bash
+pnpm codegen   # regenerate after schema or operation changes
+```
+
+Operations files in `apps/web/src/lib/graphql/operations/` define GQL documents and re-export types from `generated/types.ts` — they do **not** contain hand-written interfaces.
+
 ### Next.js Web App (apps/web)
 
 Standard Next.js 16 app using:
@@ -84,6 +113,7 @@ Standard Next.js 16 app using:
 - Tailwind CSS for styling
 - TypeScript
 - GraphQL operations defined in `apps/web/src/lib/graphql/operations/`
+- Generated types imported from `apps/web/src/lib/graphql/generated/types.ts`
 
 ## Common Commands
 
@@ -160,6 +190,8 @@ sam deploy --guided
 - **nx.json**: Nx workspace configuration with plugin settings
 - **package.json**: Root dependencies and workspace scripts
 - **apps/api/package.json**: API-specific Nx build targets (esbuild, prune-lockfile, etc.)
+- **libs/shared/package.json**: Shared library with `@showcase/source` export condition
+- **codegen.ts**: GraphQL Codegen config (schema → generated types)
 - **infra/template.yaml**: AWS SAM CloudFormation template
 - **infra/env.local.json**: Local env overrides for SAM (gitignored — copy from env.local.json.example)
 - **infra/docker-compose.local.yaml**: DynamoDB Local container
@@ -200,7 +232,9 @@ DynamoDB Local runs in Docker on the `showcase-local` network. SAM Lambda contai
 3. **Next.js Pages/Components**:
    - Use App Router structure in apps/web/src/app/
    - Tailwind CSS is pre-configured
-   - Add GraphQL operations to `apps/web/src/lib/graphql/operations/`
+   - Add GraphQL operation documents to `apps/web/src/lib/graphql/operations/`
+   - Run `pnpm codegen` after any schema or operation changes to regenerate `generated/types.ts`
+   - Import types from `generated/types.ts` — never write them by hand
 
 4. **Testing**:
    - Jest for unit tests (*.spec.ts, *.spec.tsx)

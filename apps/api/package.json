@@ -40,5 +40,7 @@
       }
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "@showcase/shared": "workspace:*"
+  }
 }

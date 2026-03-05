@@ -4,6 +4,7 @@
   "license": "MIT",
   "packageManager": "pnpm@9.7.1",
   "scripts": {
+    "codegen": "graphql-codegen --config codegen.ts",
     "lint": "pnpm nx lint api && pnpm nx lint web",
     "watch:typecheck": "nx typecheck api --watch",
     "build:api": "nx build api",
@@ -20,6 +21,9 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.8.0",
+    "@graphql-codegen/cli": "^6.1.2",
+    "@graphql-codegen/typescript": "^5.0.8",
+    "@graphql-codegen/typescript-operations": "^5.0.8",
     "@next/eslint-plugin-next": "^16.0.1",
     "@nx/devkit": "22.2.0",
     "@nx/esbuild": "22.3.1",

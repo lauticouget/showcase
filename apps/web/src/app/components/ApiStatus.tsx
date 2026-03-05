@@ -1,10 +1,10 @@
 'use client';
 
 import { useQuery } from '@apollo/client/react';
-import { HEALTH_QUERY, type HealthQueryData } from '@/lib/graphql/operations';
+import { HEALTH_QUERY, type HealthQuery } from '@/lib/graphql/operations';
 
 export default function ApiStatus() {
-  const { data, loading, error } = useQuery<HealthQueryData>(HEALTH_QUERY);
+  const { data, loading, error } = useQuery<HealthQuery>(HEALTH_QUERY);
 
   const isConnected = !loading && !error && data?.health === 'OK';
 
