@@ -30,16 +30,20 @@ apps/api/src/
   handler.ts              # Lambda entry point
   schema/
     index.ts              # Creates executable schema from modules
+  lib/
+    dynamodb.ts           # DynamoDB client singleton
+    dynamoUtils.ts        # Generic DynamoDB operations
+    errors.ts             # AppError, AppErrorCode, GraphQLErrorCode, DynamoErrorName
+    logger.ts             # AWS Lambda Powertools logger
   modules/
     index.ts              # Merges all module typeDefs and resolvers
-    health/               # Example module
-      typeDefs.ts         # GraphQL types for this feature
-      resolvers.ts        # Resolvers for this feature
-      index.ts            # Exports both
-    [feature]/            # Add new features as modules
-      typeDefs.ts
-      resolvers.ts
-      index.ts
+    health/               # Health check module
+    users/                # Users CRUD module
+      typeDefs.ts         # GraphQL schema
+      resolvers.ts        # Resolvers (imports GraphQLErrorCode, DynamoErrorName from lib/errors)
+      userRepository.ts   # DynamoDB operations for users
+      index.ts            # Exports typeDefs and resolvers
+    [feature]/            # Add new features as **modules**
 ```
 
 **Adding a new feature:**
@@ -51,34 +55,64 @@ The API builds to CommonJS format (.cjs) and is deployed to AWS Lambda via SAM. 
 - HTTP API with POST /graphql endpoint
 - 256 MB memory, 15 second timeout
 - CodeUri points to dist/apps/api
+- DynamoDB table with PAY_PER_REQUEST billing, SSE enabled, DeletionPolicy/UpdateReplacePolicy: Retain
+
+### DynamoDB Layer
+
+Generic utilities live in `lib/dynamoUtils.ts` — do not duplicate these in repositories:
+- `scanPage<T>(tableName, limit, cursor?)` — paginated scan with base64url cursor
+- `updateItem<T>(tableName, key, fields)` — builds UpdateExpression dynamically; sets `updatedAt` automatically
+- `timedOperation(tableName, operation, fn)` — wraps any DynamoDB call with debug/info/error logging
+
+Repository pattern: each feature has its own `[feature]Repository.ts` that uses these utilities. Table name comes from an env var validated at module load time via IIFE (throws on missing var).
+
+### Error Handling
+
+All error constants live in `lib/errors.ts`:
+- `AppErrorCode` enum — infrastructure/business logic errors (e.g. `EmptyUpdate`)
+- `AppError` class — thrown for business logic errors with typed codes
+- `GraphQLErrorCode` enum — GraphQL extension codes (`NotFound`, `Unauthenticated`, `Forbidden`, `BadUserInput`, `InternalError`)
+- `DynamoErrorName` const — DynamoDB error name strings (e.g. `ConditionalCheckFailed`)
+
+Always use `GraphQLErrorCode` and `DynamoErrorName` in resolvers — never hardcode strings.
 
 ### Next.js Web App (apps/web)
 
 Standard Next.js 16 app using:
 - App Router architecture
-- React 19 with server components
+- React 19 with server components + client components (`'use client'`) with Apollo Client
 - Tailwind CSS for styling
 - TypeScript
+- GraphQL operations defined in `apps/web/src/lib/graphql/operations/`
 
 ## Common Commands
 
 ### Build & Development
 
 ```bash
-# Build API for Lambda deployment
-nx build api
+# Full local dev (starts DynamoDB, builds API in watch mode, starts SAM with debugger)
+pnpm dev:api
 
-# Build Next.js web app
-nx build web
+# Start DynamoDB Local only
+pnpm dynamo:start
+
+# Stop DynamoDB Local
+pnpm dynamo:stop
+
+# Build API for Lambda deployment
+pnpm build:api        # or: nx build api
+
+# Watch mode build
+pnpm watch:api
 
 # Run Next.js dev server
 nx dev web
 
-# Serve API locally (not SAM)
-nx serve api
+# Start SAM local API (standard)
+pnpm sam
 
-# Local Lambda development with SAM
-pnpm api
+# Start SAM local API with debugger on port 9229
+pnpm sam:inspect
 ```
 
 ### Testing
@@ -103,9 +137,6 @@ nx test web --testFile=specs/index.spec.tsx
 
 ```bash
 # Lint all projects
-nx lint
-
-# Lint specific project
 nx lint api
 nx lint web
 
@@ -117,31 +148,11 @@ nx typecheck web
 ### Infrastructure & Deployment
 
 ```bash
-# Start SAM local API (runs Lambda locally)
-pnpm api
-# This runs: sam local start-api -t ./infra/template.yaml
-
 # Before deploying, ensure API is built
 nx build api
 
-# Deploy with SAM (example)
+# Deploy with SAM
 sam deploy --guided
-```
-
-### Nx Utilities
-
-```bash
-# Visualize project graph
-nx graph
-
-# See affected projects
-nx affected:graph
-
-# Sync TypeScript project references
-nx sync
-
-# Run command for all projects
-nx run-many --target=build --all
 ```
 
 ## Key Configuration Files
@@ -149,18 +160,37 @@ nx run-many --target=build --all
 - **nx.json**: Nx workspace configuration with plugin settings
 - **package.json**: Root dependencies and workspace scripts
 - **apps/api/package.json**: API-specific Nx build targets (esbuild, prune-lockfile, etc.)
-- **apps/web/package.json**: Web app dependencies
 - **infra/template.yaml**: AWS SAM CloudFormation template
-- **jest.config.ts**: Root Jest configuration (uses `getJestProjectsAsync()`)
+- **infra/env.local.json**: Local env overrides for SAM (gitignored — copy from env.local.json.example)
+- **infra/docker-compose.local.yaml**: DynamoDB Local container
+- **scripts/create-local-table.mjs**: Creates DynamoDB tables for local development
+- **.cfnlintrc.yaml**: cfn-lint configuration
+- **.vscode/settings.json**: Editor config (yaml.customTags for CloudFormation, cfn-lint settings)
+- **jest.config.ts**: Root Jest configuration
+
+## Local Development Setup
+
+DynamoDB Local runs in Docker on the `showcase-local` network. SAM Lambda containers also attach to this network and reach DynamoDB via `http://dynamodb-local:8000` (not `localhost`).
+
+`pnpm dev:api` runs everything in sequence/parallel:
+1. `dynamo:start` — starts Docker container, waits until healthy, creates tables
+2. `watch:api` — esbuild in watch mode
+3. `sam:inspect` — SAM local with debug port 9229
+4. `watch:typecheck` — TypeScript watch
+
+**Important**: SAM serves from `dist/apps/api`. Always rebuild after source changes before testing. Variables in `env.local.json` only override SAM env vars that are **already declared** in `template.yaml` — new variables must be declared in the template first (even as empty string).
 
 ## Development Workflow
 
 1. **Adding a GraphQL Feature Module**:
    - Create new folder: `apps/api/src/modules/[feature]/`
-   - Add `typeDefs.ts` with GraphQL schema definitions
-   - Add `resolvers.ts` with resolver functions
-   - Add `index.ts` to export both
+   - Add `typeDefs.ts`, `resolvers.ts`, `index.ts`, `[feature]Repository.ts`
+   - Validate table name env var via IIFE at module load time
+   - Use `scanPage`, `updateItem`, `timedOperation` from `lib/dynamoUtils.ts`
+   - Use `GraphQLErrorCode` and `DynamoErrorName` from `lib/errors.ts` in resolvers
+   - Add `ConditionExpression: 'attribute_exists(pk)'` to UpdateItem and DeleteItem
    - Register in `apps/api/src/modules/index.ts`
+   - Add DynamoDB table resource and `DynamoDBCrudPolicy` to `infra/template.yaml`
 
 2. **Lambda Deployment Preparation**:
    - Run `nx build api` to compile to dist/apps/api
@@ -170,11 +200,26 @@ nx run-many --target=build --all
 3. **Next.js Pages/Components**:
    - Use App Router structure in apps/web/src/app/
    - Tailwind CSS is pre-configured
+   - Add GraphQL operations to `apps/web/src/lib/graphql/operations/`
 
 4. **Testing**:
    - Jest for unit tests (*.spec.ts, *.spec.tsx)
    - Playwright for E2E tests
    - Tests depend on build target completing first
+
+## CloudFormation / SAM Conventions
+
+- All stateful resources (DynamoDB tables) must have `DeletionPolicy: Retain` and `UpdateReplacePolicy: Retain`
+- Log groups use `DeletionPolicy: Delete` and `UpdateReplacePolicy: Delete`
+- Use cfn-guard metadata suppression for intentionally skipped rules:
+  ```yaml
+  Metadata:
+    guard:
+      SuppressedRules:
+        - RULE_NAME
+  ```
+- `!Ref` on a DynamoDB table returns the table name — use this to pass table names to Lambda env vars
+- `DynamoDBCrudPolicy` SAM policy template grants Lambda full CRUD on a specific table
 
 ## Nx Target Dependencies
 
