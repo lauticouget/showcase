@@ -10,7 +10,7 @@ applications:
             - pnpm config set node-linker hoisted
             - pnpm install --frozen-lockfile
             - pnpm --dir ../.. codegen
-            - git diff --exit-code apps/web/src/lib/graphql/generated/
+            - git diff --exit-code -- src/lib/graphql/generated/
             - pnpm nx typecheck web
         build:
           commands:
