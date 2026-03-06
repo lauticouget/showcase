@@ -17,7 +17,7 @@ const layers: Record<LayerKey, LayerDetail> = {
     color: 'from-accent-primary to-accent-primary/60',
     tech: ['Next.js 16', 'React 19', 'Tailwind CSS'],
     description:
-      'Mostly Server-rendered React app hosted on AWS Amplify. Uses the App Router with server components for fast initial.',
+      'Hybrid Server-rendered React app with client components for interactivity, hosted on AWS Amplify. Uses the App Router with server components for fast initial.',
   },
   gateway: {
     title: 'API Gateway',
