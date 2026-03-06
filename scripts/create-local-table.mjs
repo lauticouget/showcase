@@ -19,6 +19,14 @@ try {
       KeySchema: [{ AttributeName: 'userId', KeyType: 'HASH' }],
       AttributeDefinitions: [
         { AttributeName: 'userId', AttributeType: 'S' },
+        { AttributeName: 'email', AttributeType: 'S' },
+      ],
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'email-index',
+          KeySchema: [{ AttributeName: 'email', KeyType: 'HASH' }],
+          Projection: { ProjectionType: 'ALL' },
+        },
       ],
       BillingMode: 'PAY_PER_REQUEST',
     })

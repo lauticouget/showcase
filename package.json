@@ -14,7 +14,8 @@
     "dynamo:stop": "docker compose -f ./infra/docker-compose.local.yaml down",
     "sam": "sam local start-api -t ./infra/template.yaml --warm-containers LAZY --docker-network showcase-local --env-vars ./infra/env.local.json",
     "sam:inspect": "pnpm kill:container && sam local start-api -t ./infra/template.yaml --warm-containers LAZY --debug-port 9229 --docker-network showcase-local --env-vars ./infra/env.local.json",
-    "dev:api": "pnpm dynamo:start && concurrently --kill-others --names \"BUILD,SAM,TYPES\" -c \"cyan,magenta,yellow\" \"pnpm watch:api\" \"pnpm sam:inspect\" \"pnpm watch:typecheck\""
+    "sam:inspect:pretty": "pnpm kill:container && sam local start-api -t ./infra/template.yaml --warm-containers LAZY --debug-port 9229 --docker-network showcase-local --env-vars ./infra/env.local.json 2>&1 | node ./scripts/pretty-logs.mjs",
+    "dev:api": "pnpm dynamo:start && concurrently --kill-others --names \"BUILD,SAM,TYPES\" -c \"cyan,magenta,yellow\" \"pnpm watch:api\" \"pnpm sam:inspect:pretty\" \"pnpm watch:typecheck\""
   },
   "nx": {},
   "private": true,

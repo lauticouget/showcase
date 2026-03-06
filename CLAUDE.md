@@ -66,6 +66,12 @@ Generic utilities live in `lib/dynamoUtils.ts` — do not duplicate these in rep
 
 Repository pattern: each feature has its own `[feature]Repository.ts` that uses these utilities. Table name comes from an env var validated at module load time via IIFE (throws on missing var).
 
+**`getUser` union input pattern**: repositories that need to look up by multiple unique keys use a discriminated union input — `getUser({ userId })` uses `GetCommand` on the primary key; `getUser({ email })` uses `QueryCommand` on a GSI. Never use `ScanCommand` for unique-key lookups.
+
+**UsersTable indexes:**
+- Primary key: `userId` (hash) — `GetCommand`
+- GSI `email-index`: `email` (hash), `ProjectionType: ALL` — `QueryCommand` with `IndexName: 'email-index'`
+
 ### Error Handling
 
 All error constants live in `lib/errors.ts`:
