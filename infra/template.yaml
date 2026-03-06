@@ -40,8 +40,17 @@ Resources:
       KeySchema:
         - AttributeName: userId
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: email-index
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
       AttributeDefinitions:
         - AttributeName: userId
+          AttributeType: S
+        - AttributeName: email
           AttributeType: S
       SSESpecification:
         SSEEnabled: true
