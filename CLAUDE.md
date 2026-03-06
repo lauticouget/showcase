@@ -246,6 +246,7 @@ DynamoDB Local runs in Docker on the `showcase-local` network. SAM Lambda contai
    - Jest for unit tests (*.spec.ts, *.spec.tsx)
    - Playwright for E2E tests
    - Tests depend on build target completing first
+   - **After any change that adds or modifies a React context provider, update all affected test files to wrap rendered components with that provider.** If a new context is added to `layout.tsx` or anywhere in the component tree, its provider must be added to the test wrappers too.
 
 ## CloudFormation / SAM Conventions
 
@@ -266,3 +267,7 @@ DynamoDB Local runs in Docker on the `showcase-local` network. SAM Lambda contai
 - `test` depends on `^build` (builds dependencies first)
 - `@nx/esbuild:esbuild` is cached and depends on `^build`
 - API `prune` target orchestrates lockfile pruning and workspace module copying for Lambda deployment
+
+## Git Commits
+- Git commit messages should be written like: `<branch name>: <API|WEB|API-WEB> | <feature>`.
+And then a list of changes tabbed with "-" .

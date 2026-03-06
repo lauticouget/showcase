@@ -2,6 +2,7 @@ import { MockedProvider as MockedApolloProvider } from '@apollo/client/testing/r
 import { render } from '@testing-library/react';
 
 import Page from '../src/app/page';
+import { UserProvider } from '../src/lib/context/UserContext';
 import { HEALTH_QUERY } from '../src/lib/graphql/operations';
 
 const mocks = [
@@ -15,7 +16,9 @@ describe('Page', () => {
   it('should render successfully', () => {
     const { baseElement } = render(
       <MockedApolloProvider mocks={mocks}>
-        <Page />
+        <UserProvider>
+          <Page />
+        </UserProvider>
       </MockedApolloProvider>
     );
     expect(baseElement).toBeTruthy();
