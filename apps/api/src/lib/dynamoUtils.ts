@@ -10,6 +10,7 @@ import { logger } from './logger.js';
 export const DynamoOperation = {
   PutItem: 'PutItem',
   GetItem: 'GetItem',
+  Query: 'Query',
   Scan: 'Scan',
   UpdateItem: 'UpdateItem',
   DeleteItem: 'DeleteItem',

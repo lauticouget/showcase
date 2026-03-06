@@ -2,6 +2,7 @@ import {
   DeleteCommand,
   GetCommand,
   PutCommand,
+  QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
 
 import { docClient } from '../../lib/dynamodb.js';
@@ -45,20 +46,38 @@ export async function putUser(user: UserRecord): Promise<void> {
 }
 
 export async function getUser(
-  userId: string
+  by: { userId: string } | { email: string }
 ): Promise<UserRecord | undefined> {
+  if ('userId' in by) {
+    const result = await timedOperation(
+      USERS_TABLE_NAME,
+      DynamoOperation.GetItem,
+      () =>
+        docClient.send(
+          new GetCommand({
+            TableName: USERS_TABLE_NAME,
+            Key: { userId: by.userId },
+          })
+        )
+    );
+    return result.Item as UserRecord | undefined;
+  }
+
   const result = await timedOperation(
     USERS_TABLE_NAME,
-    DynamoOperation.GetItem,
+    DynamoOperation.Query,
     () =>
       docClient.send(
-        new GetCommand({
+        new QueryCommand({
           TableName: USERS_TABLE_NAME,
-          Key: { userId },
+          IndexName: 'email-index',
+          KeyConditionExpression: 'email = :email',
+          ExpressionAttributeValues: { ':email': by.email },
+          Limit: 1,
         })
       )
   );
-  return result.Item as UserRecord;
+  return result.Items?.[0] as UserRecord | undefined;
 }
 
 export async function listUsers(
@@ -72,7 +91,11 @@ export async function updateUser(
   userId: string,
   fields: Partial<Pick<UserRecord, 'name'>>
 ): Promise<UserRecord> {
-  return updateItem<UserRecord>(USERS_TABLE_NAME, { userId }, fields);
+  return updateItem<UserRecord>(
+    USERS_TABLE_NAME,
+    { userId },
+    fields
+  );
 }
 
 export async function deleteUser(userId: string): Promise<void> {

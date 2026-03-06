@@ -12,7 +12,7 @@ export const resolvers = {
       _: unknown,
       { userId }: { userId: string }
     ): Promise<UserRecord> => {
-      const user = await repo.getUser(userId);
+      const user = await repo.getUser({ userId });
       if (!user) {
         throw new GraphQLError('User not found', {
           extensions: { code: GraphQLErrorCode.NotFound },
@@ -34,6 +34,12 @@ export const resolvers = {
       _: unknown,
       { input }: { input: { name: string; email: string } }
     ): Promise<UserRecord> => {
+      const existing = await repo.getUser({ email: input.email });
+      if (existing) {
+        throw new GraphQLError('Email already in use', {
+          extensions: { code: GraphQLErrorCode.BadUserInput },
+        });
+      }
       const user: UserRecord = {
         userId: randomUUID(),
         name: input.name,
