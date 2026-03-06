@@ -36,7 +36,7 @@ const layers: Record<LayerKey, LayerDetail> = {
   infra: {
     title: 'Infrastructure',
     color: 'from-accent-primary via-accent-secondary to-accent-tertiary',
-    tech: ['SAM / CloudFormation', 'GitHub Actions', 'Nx Monorepo'],
+    tech: ['SAM / CloudFormation', 'GitHub Actions', 'Nx Monorepo', 'Amplify'],
     description:
       'Infrastructure as Code with AWS SAM. CI runs lint, typecheck, and tests on affected projects. CD deploys automatically: API via SAM, frontend via Amplify.',
   },
@@ -137,7 +137,7 @@ export default function Architecture() {
 
   return (
     <section className="border-t border-border bg-bg-primary">
-      <div className="mx-auto max-w-5xl px-6 py-20 md:px-12 md:py-28">
+      <div className="mx-auto max-w-5xl px-6 pt-20 pb-10 md:px-12 md:pt-28 md:pb-12">
         {/* Section header */}
         <div className="text-center">
           <p className="text-sm font-medium tracking-widest uppercase text-accent-secondary">

@@ -43,6 +43,7 @@ export type MutationUpdateUserArgs = {
 
 export type Query = {
   getUser: User;
+  getUserByEmail: User;
   health: Scalars['String']['output'];
   listUsers: UsersPage;
 };
@@ -50,6 +51,11 @@ export type Query = {
 
 export type QueryGetUserArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type QueryGetUserByEmailArgs = {
+  email: Scalars['String']['input'];
 };
 
 
@@ -86,6 +92,13 @@ export type GetUserQueryVariables = Exact<{
 
 
 export type GetUserQuery = { getUser: { userId: string, name: string, email: string, createdAt: string, updatedAt: string | null } };
+
+export type GetUserByEmailQueryVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type GetUserByEmailQuery = { getUserByEmail: { userId: string, name: string, email: string } };
 
 export type ListUsersQueryVariables = Exact<{
   limit: InputMaybe<Scalars['Int']['input']>;

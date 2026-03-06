@@ -11,6 +11,13 @@
           "port": 4200,
           "buildTarget": "@showcase/web:start"
         }
+      },
+      "typecheck": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "tsc --noEmit",
+          "cwd": "apps/web"
+        }
       }
     }
   },

@@ -13,6 +13,8 @@ export type {
   DeleteUserMutationVariables,
   GetUserQuery,
   GetUserQueryVariables,
+  GetUserByEmailQuery,
+  GetUserByEmailQueryVariables,
   ListUsersQuery,
   ListUsersQueryVariables,
   UpdateUserMutation,
@@ -27,6 +29,16 @@ export const GET_USER_QUERY = gql`
       email
       createdAt
       updatedAt
+    }
+  }
+`;
+
+export const GET_USER_BY_EMAIL_QUERY = gql`
+  query GetUserByEmail($email: String!) {
+    getUserByEmail(email: $email) {
+      userId
+      name
+      email
     }
   }
 `;

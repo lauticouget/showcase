@@ -21,6 +21,19 @@ export const resolvers = {
       return user;
     },
 
+    getUserByEmail: async (
+      _: unknown,
+      { email }: { email: string }
+    ): Promise<UserRecord> => {
+      const user = await repo.getUser({ email });
+      if (!user) {
+        throw new GraphQLError('User not found', {
+          extensions: { code: GraphQLErrorCode.NotFound },
+        });
+      }
+      return user;
+    },
+
     listUsers: async (
       _: unknown,
       { limit, cursor }: { limit?: number; cursor?: string }

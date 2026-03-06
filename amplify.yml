@@ -9,6 +9,9 @@ applications:
             - corepack prepare pnpm@9.7.1 --activate
             - pnpm config set node-linker hoisted
             - pnpm install --frozen-lockfile
+            - pnpm codegen
+            - git diff --exit-code apps/web/src/lib/graphql/generated/
+            - pnpm nx typecheck web
         build:
           commands:
             - pnpm nx build web

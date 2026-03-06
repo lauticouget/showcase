@@ -1,6 +1,7 @@
 export { HEALTH_QUERY, type HealthQuery, type HealthQueryVariables } from './health';
 export {
   GET_USER_QUERY,
+  GET_USER_BY_EMAIL_QUERY,
   LIST_USERS_QUERY,
   CREATE_USER_MUTATION,
   UPDATE_USER_MUTATION,
@@ -11,6 +12,8 @@ export type {
   UsersPage,
   GetUserQuery,
   GetUserQueryVariables,
+  GetUserByEmailQuery,
+  GetUserByEmailQueryVariables,
   ListUsersQuery,
   ListUsersQueryVariables,
   CreateUserMutation,

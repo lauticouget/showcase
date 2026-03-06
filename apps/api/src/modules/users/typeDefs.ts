@@ -25,6 +25,7 @@ export const typeDefs = gql`
 
   type Query {
     getUser(userId: ID!): User!
+    getUserByEmail(email: String!): User!
     listUsers(limit: Int, cursor: String): UsersPage!
   }
 
