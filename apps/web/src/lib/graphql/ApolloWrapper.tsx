@@ -9,7 +9,7 @@ import {
 
 function makeClient() {
   const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL,
+    uri: '/api/auth/graphql',
   });
 
   return new ApolloClient({

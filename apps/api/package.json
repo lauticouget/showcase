@@ -21,6 +21,9 @@
           "bundle": true,
           "thirdParty": true,
           "main": "apps/api/src/handler.ts",
+          "additionalEntryPoints": [
+            "apps/api/src/postConfirmation.ts"
+          ],
           "tsConfig": "apps/api/tsconfig.app.json",
           "assets": [
             "apps/api/src/assets"

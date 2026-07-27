@@ -1,31 +1,27 @@
-import { randomUUID } from 'crypto';
-
 import { GraphQLError } from 'graphql';
 
+import type { AppContext } from '../../handler.js';
+import { requireOwnership } from '../../lib/authGuard.js';
 import { DynamoErrorName, GraphQLErrorCode } from '../../lib/errors.js';
 import * as repo from './userRepository.js';
 import type { UserRecord } from './userRepository.js';
 
 export const resolvers = {
   Query: {
+    me: async (
+      _: unknown,
+      __: unknown,
+      context: AppContext
+    ): Promise<UserRecord | null> => {
+      if (!context.currentUser) return null;
+      return (await repo.getUser({ userId: context.currentUser.sub })) ?? null;
+    },
+
     getUser: async (
       _: unknown,
       { userId }: { userId: string }
     ): Promise<UserRecord> => {
       const user = await repo.getUser({ userId });
-      if (!user) {
-        throw new GraphQLError('User not found', {
-          extensions: { code: GraphQLErrorCode.NotFound },
-        });
-      }
-      return user;
-    },
-
-    getUserByEmail: async (
-      _: unknown,
-      { email }: { email: string }
-    ): Promise<UserRecord> => {
-      const user = await repo.getUser({ email });
       if (!user) {
         throw new GraphQLError('User not found', {
           extensions: { code: GraphQLErrorCode.NotFound },
@@ -43,33 +39,12 @@ export const resolvers = {
   },
 
   Mutation: {
-    createUser: async (
-      _: unknown,
-      { input }: { input: { name: string; email: string } }
-    ): Promise<UserRecord> => {
-      const existing = await repo.getUser({ email: input.email });
-      if (existing) {
-        throw new GraphQLError('Email already in use', {
-          extensions: { code: GraphQLErrorCode.BadUserInput },
-        });
-      }
-      const user: UserRecord = {
-        userId: randomUUID(),
-        name: input.name,
-        email: input.email,
-        createdAt: new Date().toISOString(),
-      };
-      await repo.putUser(user);
-      return user;
-    },
-
     updateUser: async (
       _: unknown,
-      {
-        userId,
-        input,
-      }: { userId: string; input: { name?: string } }
+      { userId, input }: { userId: string; input: { name?: string } },
+      context: AppContext
     ): Promise<UserRecord> => {
+      requireOwnership(context, userId);
       try {
         const updated = await repo.updateUser(userId, input);
         if (!updated) {
@@ -93,8 +68,10 @@ export const resolvers = {
 
     deleteUser: async (
       _: unknown,
-      { userId }: { userId: string }
+      { userId }: { userId: string },
+      context: AppContext
     ): Promise<boolean> => {
+      requireOwnership(context, userId);
       try {
         await repo.deleteUser(userId);
         return true;

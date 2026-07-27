@@ -1,29 +1,25 @@
 import { gql } from '@apollo/client';
 
 export {
-  type CreateUserInput,
   type UpdateUserInput,
   type User,
   type UsersPage,
 } from '../generated/types';
 export type {
-  CreateUserMutation,
-  CreateUserMutationVariables,
   DeleteUserMutation,
   DeleteUserMutationVariables,
   GetUserQuery,
   GetUserQueryVariables,
-  GetUserByEmailQuery,
-  GetUserByEmailQueryVariables,
   ListUsersQuery,
   ListUsersQueryVariables,
+  MeQuery,
   UpdateUserMutation,
   UpdateUserMutationVariables,
 } from '../generated/types';
 
-export const GET_USER_QUERY = gql`
-  query GetUser($userId: ID!) {
-    getUser(userId: $userId) {
+export const ME_QUERY = gql`
+  query Me {
+    me {
       userId
       name
       email
@@ -33,12 +29,14 @@ export const GET_USER_QUERY = gql`
   }
 `;
 
-export const GET_USER_BY_EMAIL_QUERY = gql`
-  query GetUserByEmail($email: String!) {
-    getUserByEmail(email: $email) {
+export const GET_USER_QUERY = gql`
+  query GetUser($userId: ID!) {
+    getUser(userId: $userId) {
       userId
       name
       email
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -54,17 +52,6 @@ export const LIST_USERS_QUERY = gql`
         updatedAt
       }
       nextCursor
-    }
-  }
-`;
-
-export const CREATE_USER_MUTATION = gql`
-  mutation CreateUser($input: CreateUserInput!) {
-    createUser(input: $input) {
-      userId
-      name
-      email
-      createdAt
     }
   }
 `;

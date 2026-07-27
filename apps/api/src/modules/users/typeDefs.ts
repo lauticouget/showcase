@@ -9,11 +9,6 @@ export const typeDefs = gql`
     updatedAt: String
   }
 
-  input CreateUserInput {
-    name: String!
-    email: String!
-  }
-
   input UpdateUserInput {
     name: String
   }
@@ -24,13 +19,12 @@ export const typeDefs = gql`
   }
 
   type Query {
+    me: User
     getUser(userId: ID!): User!
-    getUserByEmail(email: String!): User!
     listUsers(limit: Int, cursor: String): UsersPage!
   }
 
   type Mutation {
-    createUser(input: CreateUserInput!): User!
     updateUser(userId: ID!, input: UpdateUserInput!): User!
     deleteUser(userId: ID!): Boolean!
   }

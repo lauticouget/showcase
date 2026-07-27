@@ -2,15 +2,6 @@
 
 import { useState } from 'react';
 
-import { useMutation } from '@apollo/client/react';
-
-import { useUser } from '@/lib/context/UserContext';
-import {
-  CREATE_USER_MUTATION,
-  LIST_USERS_QUERY,
-  type CreateUserMutation,
-  type CreateUserMutationVariables,
-} from '@/lib/graphql/operations';
 import { Modal } from './Modal';
 
 interface CreateUserModalProps {
@@ -21,23 +12,19 @@ interface CreateUserModalProps {
 interface FormErrors {
   name?: string;
   email?: string;
+  password?: string;
   form?: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
-  const { login } = useUser();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
-
-  const [createUser, { loading }] = useMutation<
-    CreateUserMutation,
-    CreateUserMutationVariables
-  >(CREATE_USER_MUTATION, {
-    refetchQueries: [{ query: LIST_USERS_QUERY, variables: { limit: 10 } }],
-  });
+  const [loading, setLoading] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   function validate(): FormErrors {
     const e: FormErrors = {};
@@ -45,6 +32,8 @@ export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
       e.name = 'Name must be at least 2 characters.';
     if (!email.trim() || !EMAIL_RE.test(email))
       e.email = 'Enter a valid email address.';
+    if (password.length < 8)
+      e.password = 'Password must be at least 8 characters.';
     return e;
   }
 
@@ -56,40 +45,69 @@ export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
       return;
     }
     setErrors({});
+    setLoading(true);
     try {
-      const result = await createUser({
-        variables: { input: { name: name.trim(), email: email.trim() } },
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }),
       });
-      const created = result.data?.createUser;
-      if (created) {
-        login({ userId: created.userId, name: created.name, email: created.email });
-        handleClose();
+      const json = (await res.json()) as {
+        requiresConfirmation?: boolean;
+        error?: string;
+      };
+      if (!res.ok) {
+        if (res.status === 409)
+          setErrors({ email: json.error ?? 'Email already in use.' });
+        else setErrors({ form: json.error ?? 'Sign up failed.' });
+        return;
       }
-    } catch (err: unknown) {
-      const gqlErr = (err as { graphQLErrors?: { extensions?: { code?: string }; message?: string }[] })
-        ?.graphQLErrors?.[0];
-      if (gqlErr?.extensions?.code === 'BAD_USER_INPUT') {
-        setErrors({ email: gqlErr.message ?? 'Email already in use.' });
-      } else {
-        setErrors({ form: 'Something went wrong. Please try again.' });
-      }
+      setConfirmed(true);
+    } catch {
+      setErrors({ form: 'Something went wrong. Please try again.' });
+    } finally {
+      setLoading(false);
     }
   }
 
   function handleClose() {
     setName('');
     setEmail('');
+    setPassword('');
     setErrors({});
+    setConfirmed(false);
     onClose();
+  }
+
+  if (confirmed) {
+    return (
+      <Modal open={open} onClose={handleClose} title="Check your email">
+        <p className="text-sm text-text-secondary">
+          We sent a confirmation link to{' '}
+          <span className="font-medium text-text-primary">{email}</span>. Click
+          it to activate your account, then log in.
+        </p>
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={handleClose}
+            className="rounded-md bg-accent-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          >
+            Got it
+          </button>
+        </div>
+      </Modal>
+    );
   }
 
   return (
     <Modal open={open} onClose={handleClose} title="Create Account">
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">
-            Name
-          </label>
+          <label className="mb-1 block text-xs text-text-secondary">Name</label>
           <input
             type="text"
             value={name}
@@ -103,9 +121,7 @@ export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-text-secondary">
-            Email
-          </label>
+          <label className="mb-1 block text-xs text-text-secondary">Email</label>
           <input
             type="email"
             value={email}
@@ -115,6 +131,20 @@ export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
           />
           {errors.email && (
             <p className="mt-1 text-xs text-accent-primary">{errors.email}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs text-text-secondary">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Min. 8 characters"
+            className="w-full rounded border border-border bg-bg-tertiary px-3 py-2 text-sm text-text-primary placeholder-text-tertiary outline-none transition-colors focus:border-accent-tertiary"
+          />
+          {errors.password && (
+            <p className="mt-1 text-xs text-accent-primary">{errors.password}</p>
           )}
         </div>
 
@@ -136,24 +166,9 @@ export function CreateUserModal({ open, onClose }: CreateUserModalProps) {
             className="flex items-center gap-2 rounded-md bg-accent-primary px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-60"
           >
             {loading && (
-              <svg
-                className="h-3.5 w-3.5 animate-spin"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                />
+              <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
             )}
             {loading ? 'Creating…' : 'Create Account'}

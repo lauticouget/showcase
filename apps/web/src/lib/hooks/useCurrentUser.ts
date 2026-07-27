@@ -1,57 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useApolloClient, useQuery } from '@apollo/client/react';
 
-import { useApolloClient } from '@apollo/client/react';
-
-import {
-  GET_USER_QUERY,
-  type GetUserQuery,
-  type GetUserQueryVariables,
-} from '@/lib/graphql/operations';
-
-const STORAGE_KEY = 'showcase_user';
-
-export type StoredUser = { userId: string; name: string; email: string };
-
-function readStorage(): StoredUser | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as StoredUser) : null;
-  } catch {
-    return null;
-  }
-}
+import { ME_QUERY, type MeQuery } from '@/lib/graphql/operations';
 
 export function useCurrentUser() {
   const apolloClient = useApolloClient();
-  const [user, setUser] = useState<StoredUser | null>(readStorage);
+  const { data, refetch } = useQuery<MeQuery>(ME_QUERY);
 
-  function login(u: StoredUser) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
-    setUser(u);
+  /** Called after a successful login to refresh Apollo's cache. */
+  async function login() {
+    await apolloClient.resetStore();
   }
 
-  function logout() {
-    localStorage.removeItem(STORAGE_KEY);
-    setUser(null);
+  /** Clears the httpOnly cookie via route handler, then wipes the Apollo cache. */
+  async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    await apolloClient.resetStore();
   }
 
-  async function refetch() {
-    if (!user?.userId) return;
-    try {
-      const result = await apolloClient.query<GetUserQuery, GetUserQueryVariables>({
-        query: GET_USER_QUERY,
-        variables: { userId: user.userId },
-        fetchPolicy: 'network-only',
-      });
-      const fresh = result.data?.getUser;
-      if (fresh) login({ userId: fresh.userId, name: fresh.name, email: fresh.email });
-    } catch {
-      // silently ignore — stale data is acceptable
-    }
-  }
+  const user = data?.me ?? null;
 
   return {
     user,

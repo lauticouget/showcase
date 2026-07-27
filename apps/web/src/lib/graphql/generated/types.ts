@@ -14,20 +14,9 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
-export type CreateUserInput = {
-  email: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-};
-
 export type Mutation = {
-  createUser: User;
   deleteUser: Scalars['Boolean']['output'];
   updateUser: User;
-};
-
-
-export type MutationCreateUserArgs = {
-  input: CreateUserInput;
 };
 
 
@@ -43,19 +32,14 @@ export type MutationUpdateUserArgs = {
 
 export type Query = {
   getUser: User;
-  getUserByEmail: User;
   health: Scalars['String']['output'];
   listUsers: UsersPage;
+  me: Maybe<User>;
 };
 
 
 export type QueryGetUserArgs = {
   userId: Scalars['ID']['input'];
-};
-
-
-export type QueryGetUserByEmailArgs = {
-  email: Scalars['String']['input'];
 };
 
 
@@ -86,19 +70,17 @@ export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type HealthQuery = { health: string };
 
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { me: { userId: string, name: string, email: string, createdAt: string, updatedAt: string | null } | null };
+
 export type GetUserQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
 }>;
 
 
 export type GetUserQuery = { getUser: { userId: string, name: string, email: string, createdAt: string, updatedAt: string | null } };
-
-export type GetUserByEmailQueryVariables = Exact<{
-  email: Scalars['String']['input'];
-}>;
-
-
-export type GetUserByEmailQuery = { getUserByEmail: { userId: string, name: string, email: string } };
 
 export type ListUsersQueryVariables = Exact<{
   limit: InputMaybe<Scalars['Int']['input']>;
@@ -107,13 +89,6 @@ export type ListUsersQueryVariables = Exact<{
 
 
 export type ListUsersQuery = { listUsers: { nextCursor: string | null, items: Array<{ userId: string, name: string, email: string, createdAt: string, updatedAt: string | null }> } };
-
-export type CreateUserMutationVariables = Exact<{
-  input: CreateUserInput;
-}>;
-
-
-export type CreateUserMutation = { createUser: { userId: string, name: string, email: string, createdAt: string } };
 
 export type UpdateUserMutationVariables = Exact<{
   userId: Scalars['ID']['input'];
